@@ -1,0 +1,89 @@
+name: Build & Upload Fairspace-Jupyter Docker image
+
+on:
+  push:
+    branches:
+      - dev
+      - release
+      - devops/FAIRSPC-57_github_actions
+
+jobs:
+  build-and-upload-jupyterhub:
+    name: Build & Upload Fairspace-Jupyter (K8s Hub) Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Get version tag for artifact
+        run: |
+          BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "Building images from the branch: $BRANCH"
+          VER=$(cat ./projects/jupyterhub-hub/VERSION)
+          echo "Building images of version: $VER"
+          if [ $BRANCH != "release" ]
+          then
+            VER=$VER-SNAPSHOT
+          fi
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-hub
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./projects/jupyterhub-hub/
+          push: true
+          tags: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-hub:${{ env.VERSION }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-and-upload-jupyterhub-singleuser:
+    name: Build & Upload Fairspace-Jupyter (Single User) Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Get version tag for artifact
+        run: |
+          BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "Building images from the branch: $BRANCH"
+          VER=$(cat ./projects/jupyterhub-singleuser/VERSION)
+          echo "Building images of version: $VER"
+          if [ $BRANCH != "release" ]
+          then
+            VER=$VER-SNAPSHOT
+          fi
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-singleuser
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./projects/jupyterhub-singleuser/
+          push: true
+          tags: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-singleuser:${{ env.VERSION }}
+          labels: ${{ steps.meta.outputs.labels }}
