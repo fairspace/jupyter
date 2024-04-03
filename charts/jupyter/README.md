@@ -7,8 +7,8 @@ The connection to the workspace should be configured in the `values.yaml` file.
 
 Install [the Google Cloud SDK](https://cloud.google.com/sdk/install), ensure
 that your Google account has access to the fairspace-207108 GCP project,
-log in using `gcloud auth login`, and configure Docker for access to the GCP
-registries using `gcloud auth configure-docker`.
+log in using `gcloud auth login`. Make sure you have access to the [docker registry](ghcr.io/thehyve/fairspace-jupyter) 
+and [Helm Chart repository](ghcr.io/thehyve/fairspace-jupyter/helm-charts).
 
 A working instance of a fairspace workspace should be setup. Relevant parameters must be 
 used for configuration of JupyterHub.
