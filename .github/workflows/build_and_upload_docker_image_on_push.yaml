@@ -18,7 +18,7 @@ jobs:
         run: |
           BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
           echo "Building images from the branch: $BRANCH"
-          VER=$(cat ./projects/jupyterhub-hub/VERSION)
+          VER=$(cat ./VERSION)
           echo "Building images of version: $VER"
           if [ $BRANCH != "release" ]
           then
@@ -58,7 +58,7 @@ jobs:
         run: |
           BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
           echo "Building images from the branch: $BRANCH"
-          VER=$(cat ./projects/jupyterhub-singleuser/VERSION)
+          VER=$(cat ./VERSION)
           echo "Building images of version: $VER"
           if [ $BRANCH != "release" ]
           then
