@@ -2,9 +2,6 @@ name: Build & Upload Fairspace-Jupyter Docker image
 
 on:
   push:
-    branches:
-      - dev
-      - release
 
 jobs:
   build-and-upload-jupyterhub:
@@ -43,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./projects/jupyterhub-hub/
-          push: true
+          push: ${{github.ref == 'refs/heads/release' || github.ref == 'refs/heads/dev'}}
           tags: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-hub:${{ env.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -83,6 +80,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./projects/jupyterhub-singleuser/
-          push: true
+          push: ${{github.ref == 'refs/heads/release' || github.ref == 'refs/heads/dev'}}
           tags: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}/jupyterhub-singleuser:${{ env.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
