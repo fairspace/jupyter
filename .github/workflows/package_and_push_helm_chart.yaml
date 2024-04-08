@@ -1,0 +1,59 @@
+name: Package and Push Helm Chart
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version of the Helm chart to push"
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare version
+        run: |
+          VERSION=$(cat ./VERSION)
+          BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "Building images from the branch: $BRANCH"
+          if [ $BRANCH != "release" ]; then
+            VERSION=$VERSION-SNAPSHOT
+          fi
+          # override version of custom input is provided
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo "Helm charts version to be deployed: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4.1.0
+        with:
+          version: ${{ vars.HELM_VERSION }}
+
+      - name: Login with Helm
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ vars.HELM_REGISTRY }} --username ${{ github.repository_owner }} --password-stdin
+
+      - name: Add/update Helm dependencies
+        run: |
+          helm repo add jupyterhub https://jupyterhub.github.io/helm-chart
+          helm dependency update "charts/jupyter"
+
+      - name: Lint Helm chart
+        run: |
+          helm lint "charts/jupyter"
+
+      - name: Package Helm chart
+        run: |
+          helm package "charts/jupyter" --version ${{ env.VERSION }}
+
+      - name: Push Helm chart to repository
+        if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/dev'
+        run: |
+          helm push "fairspace-jupyter-${{ env.VERSION }}.tgz" "oci://${{ vars.HELM_REGISTRY }}"
