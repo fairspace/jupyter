@@ -35,7 +35,7 @@ ingress:
 jupyterhub:
   hub:
     image:
-      name: eu.gcr.io/fairspace-207108/jupyterhub-hub
+      name: ghcr.io/thehyve/fairspace-jupyter/jupyterhub-hub
       tag: RELEASEVERSION
     extraEnv:
       JUPYTERHUB_CRYPT_KEY:
@@ -69,7 +69,7 @@ jupyterhub:
 
   singleuser:
     image:
-      name: eu.gcr.io/fairspace-207108/jupyterhub-singleuser
+      name: ghcr.io/thehyve/fairspace-jupyter/jupyterhub-singleuser
       tag: RELEASEVERSION
     defaultUrl: "/lab"
     extraEnv:
